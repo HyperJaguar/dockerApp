@@ -8,17 +8,28 @@ services:
     - '80:3000'
     links:
     - mysql
+    volumes:
+      - .:/usr/src/DockerApp
+    networks:
+      - docker_net
   mysql:
     container_name: mysql
+    build:
+      context: ./docker/mysql
+      dockerfile: Dockerfile
     image: mysql/mysql-server
     restart: always
     environment:
     - MYSQL_ROOT_PASSWORD=root
-    - MYSQL_DATABASE=my_database
     - MYSQL_USER=nambi
     - MYSQL_PASSWORD=dev
     ports:
     - '3306:3306'
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./docker/mysql/docker-entrypoint-initdb.d/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - docker_net
   phpmyadmin:
     container_name: myadmin
     image: phpmyadmin/phpmyadmin
@@ -32,3 +43,10 @@ services:
     - mysql
     ports:
     - '8080:80'
+
+volumes:
+  data_mysql:
+
+networks:
+  docker_net:
+    driver: bridge
