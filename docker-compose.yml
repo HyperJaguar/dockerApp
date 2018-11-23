@@ -1,45 +1,44 @@
 version: '3'
 services:
   mysql:
-    build:
-      context: ./docker/mysql
-      dockerfile: Dockerfile
+    container_name: container_mysql
+    image: mysql:5.7
     restart: always
     environment:
       DATABASE_HOST: mysql
       MYSQL_DATABASE: horsemap
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: root
+      MYSQL_USER: nambi
       MYSQL_PASSWORD: root
     ports:
     - '3306:3306'
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
 
   app:
-    container_name: docker-node-mysql
+    container_name: container_app
     build: .
     ports:
     - '80:3000'
     environment:
       DATABASE_HOST: mysql
       MYSQL_DATABASE: horsemap
-      MYSQL_USER: root
+      MYSQL_USER: nambi
       MYSQL_PASSWORD: root
     depends_on:
       - mysql
     restart: on-failure
 
   phpmyadmin:
-    container_name: myadmin
+    container_name: container_myadmin
     image: phpmyadmin/phpmyadmin
     environment:
       PMA_ARBITRARY: 1
       PMA_HOST: mysql
-      MYSQL_USER: root
+      MYSQL_USER: nambi
       MYSQL_PASSWORD: root
       MYSQL_ROOT_PASSWORD: root
     depends_on:
     - mysql
     ports:
     - '8080:80'
-
-
