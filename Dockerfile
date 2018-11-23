@@ -1,6 +1,6 @@
 FROM node:8
 
-WORKDIR ~/WorkSpace/node/dockerApp
+WORKDIR /usr/src/app
 
 COPY package*.json ./
 
