@@ -6,28 +6,35 @@ services:
     restart: always
     environment:
       DATABASE_HOST: mysql
-      MYSQL_DATABASE: horsemap
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: nambi
-      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-    - '3306:3306'
+    - ${MYSQL_EXT_PORT}:${MYSQL_INT_PORT}
     volumes:
       - ./data:/docker-entrypoint-initdb.d
+      - ./data/mysql:/var/lib/mysql
+    networks:
+    - docker-net
 
   app:
     container_name: container_app
     build: .
     ports:
-    - '80:3000'
+    - ${NODE_INT_PORT}:${NODE_EXT_PORT}
     environment:
       DATABASE_HOST: mysql
-      MYSQL_DATABASE: horsemap
-      MYSQL_USER: nambi
-      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     depends_on:
       - mysql
     restart: on-failure
+    networks:
+    - docker-net
+    volumes:
+      - .:/usr/src/app
 
   phpmyadmin:
     container_name: container_myadmin
@@ -35,10 +42,16 @@ services:
     environment:
       PMA_ARBITRARY: 1
       PMA_HOST: mysql
-      MYSQL_USER: nambi
-      MYSQL_PASSWORD: root
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     depends_on:
     - mysql
     ports:
-    - '8080:80'
+    - ${PHPMYADMIN_EXT_PORT}:${PHPMYADMIN_INT_PORT}
+    networks:
+    - docker-net
+
+networks:
+  docker-net:
+    driver: bridge
